@@ -31,15 +31,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const endSessionCommand = vscode.commands.registerCommand(
     'mindfulCode.endSession',
-    () => {
-      const summary = sessionManager.endSession();
-      if (summary) {
-        const duration = Math.round(summary.duration / 1000 / 60);
-        const files = summary.filesWorkedOn.length;
-        vscode.window.showInformationMessage(
-          `Session ended! Duration: ${duration}m, Files: ${files}, Keystrokes: ${summary.keystrokes}`
-        );
-      }
+    async () => {
+      await sessionManager.endSession();
+      // Notification is now handled by NotificationService
     }
   );
 

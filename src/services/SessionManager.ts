@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Session, SessionData } from '../models/Session';
 import { DatabaseService } from './DatabaseService';
+import { NotificationService } from './NotificationService';
 
 export class SessionManager {
   private currentSession: Session | null = null;
@@ -8,6 +9,8 @@ export class SessionManager {
   private statusBarItem: vscode.StatusBarItem;
   private updateTimer: NodeJS.Timeout | null = null;
   private autoSaveTimer: NodeJS.Timeout | null = null;
+  private lastBreakSuggestion: number = 0;
+  private lastFlowNotification: number = 0;
 
   constructor(private context: vscode.ExtensionContext) {
     this.database = new DatabaseService(context.globalStorageUri.fsPath);
@@ -71,7 +74,7 @@ export class SessionManager {
     console.log(`Session resumed: ${this.currentSession.id}`);
   }
 
-  endSession(): SessionData | null {
+  async endSession(): Promise<SessionData | null> {
     if (!this.currentSession) {
       vscode.window.showWarningMessage('No session to end');
       return null;
@@ -80,8 +83,11 @@ export class SessionManager {
     this.currentSession.end();
     const sessionData = this.currentSession.toJSON();
     
-    this.database.saveSession(sessionData);
+    await this.database.saveSession(sessionData);
     this.stopTimers();
+    
+    // Show enhanced notification
+    await NotificationService.showSessionEndNotification(sessionData);
     
     const result = sessionData;
     this.currentSession = null;
@@ -111,6 +117,8 @@ export class SessionManager {
     this.updateTimer = setInterval(() => {
       this.updateStatusBar();
       this.checkIdleTimeout();
+      this.checkBreakSuggestion();
+      this.checkFlowState();
     }, 5000);
 
     // Auto-save every 30 seconds
@@ -165,6 +173,50 @@ export class SessionManager {
     }
   }
 
+  private checkBreakSuggestion(): void {
+    if (!this.currentSession?.isActive || this.currentSession.isPaused) {
+      return;
+    }
+
+    const sessionData = this.currentSession.toJSON();
+    const now = Date.now();
+    
+    // Suggest breaks every 45 minutes, but not more than once every 30 minutes
+    if (sessionData.duration > 45 * 60 * 1000 && 
+        now - this.lastBreakSuggestion > 30 * 60 * 1000) {
+      this.lastBreakSuggestion = now;
+      NotificationService.showBreakSuggestion(sessionData.duration);
+    }
+  }
+
+  private checkFlowState(): void {
+    if (!this.currentSession?.isActive || this.currentSession.isPaused) {
+      return;
+    }
+
+    const config = vscode.workspace.getConfiguration('mindfulCode');
+    const enableFlowDetection = config.get<boolean>('enableFlowDetection', true);
+    
+    if (!enableFlowDetection) {
+      return;
+    }
+
+    // Simple flow state detection: continuous activity for 20+ minutes
+    const sessionData = this.currentSession.toJSON();
+    const now = Date.now();
+    
+    if (sessionData.duration > 20 * 60 * 1000 && 
+        sessionData.activeTime / sessionData.duration > 0.8 &&
+        now - this.lastFlowNotification > 30 * 60 * 1000) {
+      
+      this.currentSession.flowStateDetected = true;
+      this.currentSession.flowStateDuration = sessionData.duration * 0.7; // Estimate
+      
+      this.lastFlowNotification = now;
+      NotificationService.showFlowStateNotification(sessionData.duration);
+    }
+  }
+
   private updateStatusBar(): void {
     if (!this.currentSession) {
       this.statusBarItem.text = '$(play) Start Session';
@@ -180,7 +232,8 @@ export class SessionManager {
       this.statusBarItem.text = `$(debug-pause) ${duration}m (paused)`;
       this.statusBarItem.tooltip = 'Session paused - Click to view dashboard';
     } else if (session.isActive) {
-      this.statusBarItem.text = `$(pulse) ${duration}m`;
+      const flowIndicator = session.flowStateDetected ? '🌊' : '';
+      this.statusBarItem.text = `$(pulse) ${duration}m ${flowIndicator}`;
       this.statusBarItem.tooltip = `Active session: ${duration} minutes - Click to view dashboard`;
     }
     
