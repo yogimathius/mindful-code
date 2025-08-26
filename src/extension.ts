@@ -45,6 +45,27 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
+  const showFlowInsightsCommand = vscode.commands.registerCommand(
+    'mindfulCode.showFlowInsights',
+    () => {
+      const insights = sessionManager.getFlowInsights();
+      const metrics = sessionManager.getFlowMetrics();
+      
+      const message = [
+        `🧠 Flow State Analysis:`,
+        `• Flow Probability: ${Math.round(metrics.flowProbability * 100)}%`,
+        `• Typing Rhythm: ${Math.round(metrics.typingRhythm * 100)}%`,
+        `• Focus Consistency: ${Math.round(metrics.focusConsistency * 100)}%`,
+        `• Context Switching: ${Math.round(metrics.contextSwitching * 100)}%`,
+        '',
+        '💡 Insights:',
+        ...insights.map(insight => `• ${insight}`)
+      ].join('\n');
+
+      vscode.window.showInformationMessage(message, { modal: true });
+    }
+  );
+
   // Register event listeners
   activityTracker.activate(context);
 
@@ -53,7 +74,8 @@ export function activate(context: vscode.ExtensionContext): void {
     startSessionCommand,
     pauseSessionCommand,
     endSessionCommand,
-    showDashboardCommand
+    showDashboardCommand,
+    showFlowInsightsCommand
   );
 
   // Auto-start session if configured

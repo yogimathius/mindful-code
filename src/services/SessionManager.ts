@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { Session, SessionData } from '../models/Session';
 import { DatabaseService } from './DatabaseService';
 import { NotificationService } from './NotificationService';
+import { FlowStateAnalyzer } from './FlowStateAnalyzer';
 
 export class SessionManager {
   private currentSession: Session | null = null;
@@ -11,9 +12,11 @@ export class SessionManager {
   private autoSaveTimer: NodeJS.Timeout | null = null;
   private lastBreakSuggestion: number = 0;
   private lastFlowNotification: number = 0;
+  private flowAnalyzer: FlowStateAnalyzer;
 
   constructor(private context: vscode.ExtensionContext) {
     this.database = new DatabaseService(context.globalStorageUri.fsPath);
+    this.flowAnalyzer = new FlowStateAnalyzer();
     
     // Create status bar item
     this.statusBarItem = vscode.window.createStatusBarItem(
@@ -39,6 +42,7 @@ export class SessionManager {
 
     this.currentSession = new Session();
     this.currentSession.start();
+    this.flowAnalyzer.reset(); // Reset flow analysis for new session
     
     await this.database.saveSession(this.currentSession.toJSON());
     
@@ -100,6 +104,7 @@ export class SessionManager {
   recordActivity(file?: string): void {
     if (this.currentSession) {
       this.currentSession.recordActivity(file);
+      this.flowAnalyzer.recordKeystroke(file);
       this.checkAutoResume();
     }
   }
@@ -110,6 +115,14 @@ export class SessionManager {
 
   async getSessionHistory(days: number = 30): Promise<SessionData[]> {
     return this.database.getRecentSessions(days);
+  }
+
+  getFlowInsights(): string[] {
+    return this.flowAnalyzer.getFlowStateInsights();
+  }
+
+  getFlowMetrics() {
+    return this.flowAnalyzer.analyzeCurrentFlowState();
   }
 
   private startTimers(): void {
@@ -191,6 +204,7 @@ export class SessionManager {
 
   private checkFlowState(): void {
     if (!this.currentSession?.isActive || this.currentSession.isPaused) {
+      this.flowAnalyzer.recordInactivity();
       return;
     }
 
@@ -201,19 +215,27 @@ export class SessionManager {
       return;
     }
 
-    // Simple flow state detection: continuous activity for 20+ minutes
-    const sessionData = this.currentSession.toJSON();
+    // Use advanced flow state analysis
+    const flowMetrics = this.flowAnalyzer.analyzeCurrentFlowState();
+    const isInFlow = flowMetrics.flowProbability > 0.7;
     const now = Date.now();
     
-    if (sessionData.duration > 20 * 60 * 1000 && 
-        sessionData.activeTime / sessionData.duration > 0.8 &&
-        now - this.lastFlowNotification > 30 * 60 * 1000) {
-      
+    if (isInFlow && !this.currentSession.flowStateDetected) {
+      // Entering flow state
       this.currentSession.flowStateDetected = true;
-      this.currentSession.flowStateDuration = sessionData.duration * 0.7; // Estimate
       
-      this.lastFlowNotification = now;
-      NotificationService.showFlowStateNotification(sessionData.duration);
+      if (now - this.lastFlowNotification > 20 * 60 * 1000) { // Don't spam notifications
+        this.lastFlowNotification = now;
+        NotificationService.showFlowStateNotification(flowMetrics.flowDuration);
+      }
+    } else if (!isInFlow && this.currentSession.flowStateDetected) {
+      // Exiting flow state - could show insights
+      this.currentSession.flowStateDetected = false;
+    }
+
+    // Update flow duration with accurate measurement
+    if (isInFlow) {
+      this.currentSession.flowStateDuration = flowMetrics.flowDuration;
     }
   }
 

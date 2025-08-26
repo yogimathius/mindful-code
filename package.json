@@ -46,6 +46,11 @@
         "command": "mindfulCode.showDashboard",
         "title": "Show Dashboard",
         "category": "Mindful Code"
+      },
+      {
+        "command": "mindfulCode.showFlowInsights",
+        "title": "Show Flow Insights",
+        "category": "Mindful Code"
       }
     ],
     "configuration": {
