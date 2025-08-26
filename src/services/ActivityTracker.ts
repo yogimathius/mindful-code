@@ -39,10 +39,13 @@ export class ActivityTracker {
       this.recordActivity(event.textEditor.document.uri.fsPath);
     });
 
-    // Track terminal activity
-    const onTerminalWrite = vscode.window.onDidWriteTerminalData((event) => {
-      this.recordActivity();
-    });
+    // Track terminal activity (if available in VS Code API version)
+    let onTerminalWrite: vscode.Disposable | undefined;
+    if ('onDidWriteTerminalData' in vscode.window) {
+      onTerminalWrite = (vscode.window as any).onDidWriteTerminalData((event: any) => {
+        this.recordActivity();
+      });
+    }
 
     // Track debug session changes
     const onDebugSessionStart = vscode.debug.onDidStartDebugSession(() => {
@@ -60,10 +63,13 @@ export class ActivityTracker {
       onWindowFocusChange,
       onSelectionChange,
       onVisibleRangesChange,
-      onTerminalWrite,
       onDebugSessionStart,
       onDebugSessionTerminate
     );
+    
+    if (onTerminalWrite) {
+      this.disposables.push(onTerminalWrite);
+    }
 
     // Add to context subscriptions
     context.subscriptions.push(...this.disposables);

@@ -18,4 +18,9 @@ module.exports = {
       statements: 80,
     },
   },
+  moduleNameMapping: {
+    '^vscode$': '<rootDir>/src/__mocks__/vscode.ts',
+    '^sqlite3$': '<rootDir>/src/__mocks__/sqlite3.ts',
+  },
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
 };
