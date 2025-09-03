@@ -1,0 +1,92 @@
+[package]
+name = "mindful-code-backend"
+version = "0.1.0"
+edition = "2021"
+authors = ["Mindful Code Team <team@mindfulcode.dev>"]
+description = "Ultra-low latency Rust backend for developer productivity tracking"
+license = "MIT"
+repository = "https://github.com/yogimathius/mindful-code"
+
+[[bin]]
+name = "mindful-code-backend"
+path = "backend/src/main.rs"
+
+[dependencies]
+# Web framework and async runtime
+tokio = { version = "1.36", features = ["full"] }
+axum = { version = "0.7", features = ["json", "query", "headers", "ws", "macros"] }
+tower = { version = "0.4", features = ["timeout", "load-shed", "limit"] }
+tower-http = { version = "0.5", features = ["cors", "compression-gzip", "trace"] }
+hyper = "1.0"
+
+# Database and ORM
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json"] }
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Authentication and security
+jsonwebtoken = "9.0"
+argon2 = "0.5"
+aes-gcm = "0.10"
+rand = "0.8"
+
+# WebAssembly runtime
+wasmtime = "17.0"
+wasmtime-wasi = "17.0"
+
+# Machine Learning
+candle-core = "0.4"
+candle-nn = "0.4"
+candle-transformers = "0.4"
+hf-hub = "0.3"
+
+# Utilities
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+dotenvy = "0.15"
+
+# Performance optimizations
+dashmap = "5.5"
+arc-swap = "1.6"
+parking_lot = "0.12"
+
+# Validation
+validator = { version = "0.16", features = ["derive"] }
+
+# Configuration
+config = "0.14"
+
+[dev-dependencies]
+tokio-test = "0.4"
+criterion = { version = "0.5", features = ["html_reports"] }
+quickcheck = "1.0"
+quickcheck_macros = "1.0"
+
+[[bench]]
+name = "flow_detection"
+harness = false
+
+[[bench]]
+name = "api_performance"
+harness = false
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.bench]
+lto = "thin"
+codegen-units = 1
+
+[profile.dev]
+debug = 1
