@@ -1,47 +1,47 @@
 {
   "name": "mindful-code-dashboard",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
-  "dependencies": {
-    "@types/node": "^18.0.0",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.0",
-    "recharts": "^2.8.0",
-    "date-fns": "^2.30.0",
-    "lucide-react": "^0.263.0",
-    "tailwindcss": "^3.3.0",
-    "@headlessui/react": "^1.7.17"
-  },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "type-check": "tsc --noEmit"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "recharts": "^2.13.2",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.503.0",
+    "@headlessui/react": "^2.2.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.15",
-    "postcss": "^8.4.28"
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@types/node": "^20.17.15",
+    "@vitejs/plugin-react": "^4.3.7",
+    "@vitest/ui": "^3.0.0-beta.10",
+    "@vitest/coverage-v8": "^3.0.0-beta.10",
+    "vitest": "^3.0.0-beta.10",
+    "typescript": "^5.9.2",
+    "vite": "^6.0.7",
+    "eslint": "^9.35.0",
+    "@typescript-eslint/eslint-plugin": "^8.31.0",
+    "@typescript-eslint/parser": "^8.31.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "tailwindcss": "^3.4.17",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.6",
+    "jsdom": "^27.0.0"
   }
 }
