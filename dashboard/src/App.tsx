@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, TrendingUp, Zap, FileText, BarChart3, Settings } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Clock, Zap, BarChart3, Settings as SettingsIcon } from 'lucide-react';
 import Dashboard from './components/Dashboard';
-import SessionList from './components/SessionList';
-import FlowAnalytics from './components/FlowAnalytics';
-import Settings from './components/Settings';
 import { SessionData, DashboardStats } from './types';
 import { mockSessionData, calculateDashboardStats } from './utils/mockData';
 
@@ -29,7 +26,7 @@ function App() {
     { id: 'dashboard', name: 'Dashboard', icon: BarChart3 },
     { id: 'sessions', name: 'Sessions', icon: Clock },
     { id: 'flow', name: 'Flow Analytics', icon: Zap },
-    { id: 'settings', name: 'Settings', icon: Settings },
+    { id: 'settings', name: 'Settings', icon: SettingsIcon },
   ];
 
   if (loading) {
@@ -84,15 +81,21 @@ function App() {
         )}
         
         {activeTab === 'sessions' && (
-          <SessionList sessions={sessions} />
+          <div className="text-center py-12">
+            <p className="text-gray-500">Session list coming soon</p>
+          </div>
         )}
         
         {activeTab === 'flow' && (
-          <FlowAnalytics sessions={sessions} />
+          <div className="text-center py-12">
+            <p className="text-gray-500">Flow analytics coming soon</p>
+          </div>
         )}
         
         {activeTab === 'settings' && (
-          <Settings />
+          <div className="text-center py-12">
+            <p className="text-gray-500">Settings coming soon</p>
+          </div>
         )}
       </main>
     </div>
