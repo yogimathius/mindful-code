@@ -86,10 +86,14 @@ export class ActivityTracker {
       return;
     }
 
+    // Filter out non-workspace files and temporary files
+    if (file && !this.shouldTrackFile(file)) {
+      return; // Don't record activity for filtered files
+    }
+
     this.lastActivityTime = now;
     
-    // Filter out non-workspace files and temporary files
-    if (file && this.shouldTrackFile(file)) {
+    if (file) {
       this.sessionManager.recordActivity(file);
     } else {
       this.sessionManager.recordActivity();

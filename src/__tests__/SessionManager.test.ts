@@ -101,7 +101,7 @@ describe('SessionManager', () => {
   describe('endSession', () => {
     it('should end an active session and return session data', async () => {
       await sessionManager.startSession();
-      const sessionData = sessionManager.endSession();
+      const sessionData = await sessionManager.endSession();
       
       expect(sessionData).not.toBeNull();
       expect(sessionData?.isActive).toBe(false);
@@ -110,8 +110,8 @@ describe('SessionManager', () => {
       expect(mockDatabaseService.saveSession).toHaveBeenCalledWith(sessionData);
     });
 
-    it('should show warning when no session to end', () => {
-      const result = sessionManager.endSession();
+    it('should show warning when no session to end', async () => {
+      const result = await sessionManager.endSession();
       expect(result).toBeNull();
       expect(vscode.window.showWarningMessage).toHaveBeenCalledWith('No session to end');
     });
@@ -120,7 +120,7 @@ describe('SessionManager', () => {
       await sessionManager.startSession();
       sessionManager.pauseSession();
       
-      const sessionData = sessionManager.endSession();
+      const sessionData = await sessionManager.endSession();
       
       expect(sessionData).not.toBeNull();
       expect(sessionData?.isActive).toBe(false);

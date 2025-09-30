@@ -19,7 +19,7 @@ module.exports = {
       statements: 75,
     },
   },
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^vscode$': '<rootDir>/src/__mocks__/vscode.ts',
     '^sqlite3$': '<rootDir>/src/__mocks__/sqlite3.ts',
   },
