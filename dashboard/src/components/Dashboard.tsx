@@ -1,5 +1,4 @@
-import React from 'react';
-import { Clock, TrendingUp, Zap, FileText, Users } from 'lucide-react';
+import { Clock, TrendingUp, Zap, FileText } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { DashboardStats, SessionData } from '../types';
 import { format } from 'date-fns';
