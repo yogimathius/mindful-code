@@ -6,3 +6,9 @@ coverage
 .env
 .vscode-test
 *.vsix
+
+# Rust build artifacts
+target/
+
+# Dashboard build output
+dashboard/build/
